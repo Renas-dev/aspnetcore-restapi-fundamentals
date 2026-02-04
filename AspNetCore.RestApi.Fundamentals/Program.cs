@@ -1,5 +1,8 @@
 using AspNetCore.RestApi.Fundamentals.Repositories;
 using AspNetCore.RestApi.Fundamentals.Services;
+using AspNetCore.RestApi.Fundamentals.Models;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +11,8 @@ builder.Services.AddControllers();
 
 // Dependency Injection (data + business logic)
 builder.Services.AddSingleton<IProductRepository, InMemoryProductRepository>();
-builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICrudService<Product>, ProductService>();
+
 
 // Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();

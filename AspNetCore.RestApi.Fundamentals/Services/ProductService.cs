@@ -1,9 +1,10 @@
+using AspNetCore.RestApi.Fundamentals.Abstractions;
 using AspNetCore.RestApi.Fundamentals.Models;
 using AspNetCore.RestApi.Fundamentals.Repositories;
 
 namespace AspNetCore.RestApi.Fundamentals.Services;
 
-public class ProductService : IProductService
+public class ProductService : ICrudService<Product>
 {
     private readonly IProductRepository _repo;
 
@@ -22,29 +23,31 @@ public class ProductService : IProductService
         return _repo.GetById(id);
     }
 
-    public (bool Success, string? Error, Product? Product) Create(Product input)
+    public (bool Success, string? Error, Product? Entity) Create(Product entity)
+
     {
-        var validationError = Validate(input);
+        var validationError = Validate(entity);
         if (validationError is not null)
         {
             return (false, validationError, null);
         }
 
-        if (_repo.ExistsByName(input.Name))
+        if (_repo.ExistsByName(entity.Name))
         {
             return (false, "Product name must be unique.", null);
         }
 
         var created = _repo.Create(new Product
         {
-            Name = input.Name.Trim(),
-            Price = input.Price
+            Name = entity.Name.Trim(),
+            Price = entity.Price
         });
 
         return (true, null, created);
     }
 
-    public (bool Success, string? Error, Product? Product) Update(int id, Product input)
+    public (bool Success, string? Error, Product? Entity) Update(int id, Product entity)
+
     {
         var existing = _repo.GetById(id);
         if (existing is null)
@@ -52,19 +55,19 @@ public class ProductService : IProductService
             return (false, "Product not found.", null);
         }
 
-        var validationError = Validate(input);
+        var validationError = Validate(entity);
         if (validationError is not null)
         {
             return (false, validationError, null);
         }
 
-        if (_repo.ExistsByName(input.Name, excludingId: id))
+        if (_repo.ExistsByName(entity.Name, excludingId: id))
         {
             return (false, "Product name must be unique.", null);
         }
 
-        existing.Name = input.Name.Trim();
-        existing.Price = input.Price;
+        existing.Name = entity.Name.Trim();
+        existing.Price = entity.Price;
 
         var success = _repo.Update(existing);
         if (!success)
